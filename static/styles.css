@@ -1,0 +1,196 @@
+ :root {
+     --bg-light: #f0f2f5;
+     --bg-dark: #121212;
+     --chat-bg-light: white;
+     --chat-bg-dark: #1e1e1e;
+     --user-msg-light: #007bff;
+     --user-msg-dark: #3399ff;
+     --bot-msg-light: #e5e5ea;
+     --bot-msg-dark: #333;
+     --text-light: black;
+     --text-dark: white;
+     --border-light: #ddd;
+     --border-dark: #444;
+ }
+
+ body {
+     font-family: Arial, sans-serif;
+     background: var(--bg-light);
+     color: var(--text-light);
+     display: flex;
+     justify-content: center;
+     align-items: center;
+     height: 100vh;
+     margin: 0;
+     transition: background 0.3s, color 0.3s;
+ }
+
+ body.dark {
+     background: var(--bg-dark);
+     color: var(--text-dark);
+ }
+
+ #chat-container {
+     background: var(--chat-bg-light);
+     width: 350px;
+     height: 500px;
+     border-radius: 10px;
+     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+     display: flex;
+     flex-direction: column;
+     transition: background 0.3s;
+     position: relative;
+ }
+
+ body.dark #chat-container {
+     background: var(--chat-bg-dark);
+     box-shadow: 0 2px 15px rgba(255, 255, 255, 0.1);
+ }
+
+ #chat-box {
+     flex: 1;
+     padding: 15px;
+     overflow-y: auto;
+     border-bottom: 1px solid var(--border-light);
+     transition: border-color 0.3s;
+ }
+
+ body.dark #chat-box {
+     border-color: var(--border-dark);
+ }
+
+ .message {
+     margin: 8px 0;
+     max-width: 70%;
+     padding: 10px 15px;
+     border-radius: 20px;
+     clear: both;
+     white-space: pre-wrap;
+     word-wrap: break-word;
+     transition: background 0.3s, color 0.3s;
+     position: relative;
+ }
+
+ .user-msg {
+     background: var(--user-msg-light);
+     color: white;
+     margin-left: auto;
+ }
+
+ body.dark .user-msg {
+     background: var(--user-msg-dark);
+     color: white;
+ }
+
+ .bot-msg {
+     background: var(--bot-msg-light);
+     color: var(--text-light);
+     margin-right: auto;
+ }
+
+ body.dark .bot-msg {
+     background: var(--bot-msg-dark);
+     color: var(--text-dark);
+ }
+
+ /* Copy button */
+ .copy-btn {
+     position: absolute;
+     top: 5px;
+     right: 8px;
+     background: rgba(0, 0, 0, 0.1);
+     border: none;
+     border-radius: 4px;
+     padding: 3px 6px;
+     font-size: 12px;
+     cursor: pointer;
+     opacity: 0;
+     transition: opacity 0.3s;
+     user-select: none;
+ }
+
+ .bot-msg:hover .copy-btn {
+     opacity: 1;
+ }
+
+ body.dark .copy-btn {
+     background: rgba(255, 255, 255, 0.1);
+     color: var(--text-dark);
+ }
+
+ #input-area {
+     display: flex;
+     padding: 10px;
+     gap: 10px;
+ }
+
+ #msg-input {
+     flex: 1;
+     padding: 10px;
+     border-radius: 10px;
+     border: 1px solid var(--border-light);
+     outline: none;
+     resize: none;
+     height: 50px;
+     transition: border-color 0.3s, background 0.3s, color 0.3s;
+     background: var(--chat-bg-light);
+     color: var(--text-light);
+ }
+
+ body.dark #msg-input {
+     border-color: var(--border-dark);
+     background: var(--chat-bg-dark);
+     color: var(--text-dark);
+ }
+
+ #send-btn {
+     padding: 10px 20px;
+     border-radius: 10px;
+     border: none;
+     background: var(--user-msg-light);
+     color: white;
+     cursor: pointer;
+     transition: background 0.3s;
+ }
+
+ body.dark #send-btn {
+     background: var(--user-msg-dark);
+ }
+
+ #send-btn:hover:not(:disabled) {
+     background: #0056b3;
+ }
+
+ #send-btn:disabled {
+     background: gray;
+     cursor: not-allowed;
+ }
+
+ #theme-toggle {
+     position: absolute;
+     top: 15px;
+     right: 15px;
+     background: transparent;
+     border: 2px solid var(--user-msg-light);
+     color: var(--user-msg-light);
+     padding: 5px 10px;
+     border-radius: 5px;
+     cursor: pointer;
+     font-weight: bold;
+     transition: all 0.3s;
+     z-index: 1000;
+ }
+
+ body.dark #theme-toggle {
+     border-color: var(--user-msg-dark);
+     color: var(--user-msg-dark);
+ }
+
+ #theme-toggle:hover {
+     background: var(--user-msg-light);
+     color: white;
+ }
+
+ body.dark #theme-toggle:hover {
+     background: var(--user-msg-dark);
+ }
