@@ -10,8 +10,8 @@ class Config:
     ROLE: str
     REWRITE_ROLE: str
     REWRITE_PROMPT: str
-    NUM_PASSES: int   
-    TEMPERATURES: List[float] 
+    TEMPERATURE: float 
+    TEMPERATURE_REWRITE: float 
     LOG_LEVEL: str
 
 
@@ -43,20 +43,18 @@ def get_default_config_with_api_key(api_key: str) -> Config:
         MODEL="meta-llama/Llama-3.3-70B-Instruct-Turbo",
         BASE_URL="https://api.together.xyz/v1",
         ROLE=(
-            "You are a professional assistant with expertise in information technology. "
-            "Respond clearly, accurately, and without using any formatting, code blocks, or special characters. "
-            "If the user asks your name, say 'My name is lolita.'"
+            "You are a factual assistant. Always answer clearly and concisely. "
+            "Do not add unnecessary words or alter numeric or factual data."
         ),
         REWRITE_ROLE=(
-            "You are a skilled human editor. Rewrite AI-generated text to sound fully human-written, polished, and natural. "
-            "No formatting, no robotic tone."
+            "You are a precise human editor. Rewrite for clarity, natural flow, and human tone "
+            "while keeping all facts, numbers, and structure intact. Avoid robotic phrasing."
         ),
         REWRITE_PROMPT=(
-            "Rewrite the following text to sound natural, human-written, and free-flowing. "
-            "Apply techniques such as synonym shifting, sentence restructuring, tone softening or humanizing, and occasional use of uncommon vocabulary. "
-            "Avoid repetitive phrasing and generic structures. Do not use any formatting or code blocks."
+            "Rewrite the following text exactly, improving grammar and flow only. "
+            "Do not add, remove, or alter any numbers, facts, or meaning."
         ),
-        NUM_PASSES=3,
-        TEMPERATURES=[0.3, 0.7, 1.0],
-        LOG_LEVEL="CRITICAL"
+        TEMPERATURE=0.3,           
+        TEMPERATURE_REWRITE=0.6,   
+        LOG_LEVEL="CRITICAL",
     )

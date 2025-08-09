@@ -44,70 +44,49 @@ def main():
         get_message(args.message, channel)
         print("\n")
 
-def get_message(prompt: str, channel: Optional[Callable[[str], None]] = None) -> str:
-    client = OpenAI(
-        api_key=SETTINGS.API_KEY,
-        base_url=SETTINGS.BASE_URL,
-    )
-    text = ""
-    passes = max(1, SETTINGS.NUM_PASSES)
+def get_message(prompt: str, channel: Optional[Callable[[str], None]] = None) -> None:
+    client = OpenAI(api_key=SETTINGS.API_KEY, base_url=SETTINGS.BASE_URL)
 
     def send(msg: str):
         if channel:
             channel(msg)
 
     try:
-        for i in range(passes):
-            temperature = SETTINGS.TEMPERATURES[i % len(SETTINGS.TEMPERATURES)]
-            if i == 0:
-                rewrite_prompt = prompt
-                system_message = SETTINGS.ROLE
-            else:
-                rewrite_prompt = f"{SETTINGS.REWRITE_PROMPT}\nText:\n{text}"
-                system_message = SETTINGS.REWRITE_PROMPT
+        resp = client.chat.completions.create(
+            model=SETTINGS.MODEL,
+            messages=[
+                {"role": "system", "content": SETTINGS.ROLE},
+                {"role": "user", "content": prompt},
+            ],
+            temperature=SETTINGS.TEMPERATURE,
+            top_p=0.9,
+            frequency_penalty=0.5,
+            presence_penalty=0.0,
+        )
+        text = (resp.choices[0].message.content or "").strip()
 
-            is_last_pass = (i == passes - 1)
+        rewrite_prompt = f"{SETTINGS.REWRITE_PROMPT}\nText:\n{text}"
+        response_stream = client.chat.completions.create(
+            model=SETTINGS.MODEL,
+            messages=[
+                {"role": "system", "content": SETTINGS.REWRITE_ROLE},
+                {"role": "user", "content": rewrite_prompt},
+            ],
+            temperature=SETTINGS.TEMPERATURE_REWRITE,
+            top_p=0.9,
+            frequency_penalty=0.5,
+            presence_penalty=0.0,
+            stream=True,
+        )
 
-            if not is_last_pass:
-                resp = client.chat.completions.create(
-                    model=SETTINGS.MODEL,
-                    messages=[
-                        {"role": "system", "content": system_message},
-                        {"role": "user", "content": rewrite_prompt},
-                    ],
-                    temperature=temperature,
-                    top_p=0.98,
-                    frequency_penalty=0.8,
-                )
-                text = resp.choices[0].message.content or ""
-            else:
-                response_stream = client.chat.completions.create(
-                    model=SETTINGS.MODEL,
-                    messages=[
-                        {"role": "system", "content": system_message},
-                        {"role": "user", "content": rewrite_prompt},
-                    ],
-                    temperature=temperature,
-                    top_p=0.98,
-                    frequency_penalty=0.8,
-                    stream=True,
-                )
-                full_text = ""
-                for chunk in response_stream:
-                    token = getattr(chunk.choices[0].delta, "content", None)
-                    if token:
-                        send(token)
-                        full_text += token
+        for chunk in response_stream:
+            token = getattr(chunk.choices[0].delta, "content", None)
+            if token:
+                send(token)
 
-                text = full_text.strip()
-                send(text)
+    except Exception as e:
+        send(f"[Error] {str(e)}")
 
-    except OpenAIError as e:
-        err_msg = f"[OpenAI API error] {str(e)}"
-        send(err_msg)
-        return err_msg
-
-    return text
 
 def print_token(token: str):
     print(token, end='', flush=True)

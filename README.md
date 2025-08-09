@@ -30,17 +30,18 @@ It also includes a web chatbot server powered by FastAPI for interactive AI conv
 
 Instead of hardcoding, you can customize your settings via a JSON config file:
 
-| Field Name      | Description                                                                                     |
-|-----------------|-------------------------------------------------------------------------------------------------|
-| `API_KEY`       | Your OpenAI or compatible API key used to authenticate requests                                 |
-| `MODEL`         | The AI model to use for generation (e.g., GPT-4, GPT-3.5, or a custom model endpoint)           |
-| `BASE_URL`      | The base URL of the API service endpoint (e.g., OpenAI endpoint or third-party proxy URL)       |
-| `ROLE`          | System prompt defining the AI’s role and behavior in initial generation pass                    |
-| `REWRITE_ROLE`  | Role/prompt that guides the rewriting pass to humanize and polish the AI-generated text         |
-| `REWRITE_PROMPT`| Specific prompt template used during rewriting pass to transform text style and tone            |
-| `NUM_PASSES`    | Number of total passes: one or more passes to generate and rewrite text iteratively             |
-| `TEMPERATURES`  | List of temperature values corresponding to each pass controlling randomness and creativity     |
-| `LOG_LEVEL`     | Logging verbosity level (e.g., DEBUG, INFO, WARNING, CRITICAL)                                  |
+| Field Name            | Description                                                                                                 |
+|-----------------------|-------------------------------------------------------------------------------------------------------------|
+| `API_KEY`             | Your API key for Together AI or another compatible provider                                                 |
+| `MODEL`               | The AI model to use for generation (e.g., `meta-llama/Llama-3.3-70B-Instruct-Turbo`)                        |
+| `BASE_URL`            | The base URL of the API service endpoint (e.g., `https://api.together.xyz/v1`)                              |
+| `ROLE`                | System prompt defining the AI’s role and behavior during the initial generation pass                        |
+| `REWRITE_ROLE`        | Role/prompt that guides the rewriting pass to keep meaning while improving clarity                          |
+| `REWRITE_PROMPT`      | Specific prompt template used during rewriting to improve grammar/flow without changing facts or numbers    |
+| `TEMPERATURE`         | Temperature value controlling creativity for the initial generation pass                                    |
+| `TEMPERATURE_REWRITE` | Temperature value controlling creativity for the rewrite pass                                               |
+| `LOG_LEVEL`           | Logging verbosity level (e.g., `DEBUG`, `INFO`, `WARNING`, `CRITICAL`)                                      |
+
 
 ---
 
