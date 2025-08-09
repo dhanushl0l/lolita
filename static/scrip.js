@@ -1,31 +1,33 @@
 const chatBox = document.getElementById('chat-box');
 const input = document.getElementById('msg-input');
 const sendBtn = document.getElementById('send-btn');
-const themeToggle = document.getElementById('theme-toggle');
+// const themeToggle = document.getElementById('theme-toggle');
 
 let botTyping = false;
 
 document.addEventListener("DOMContentLoaded", () => {
-    const themeToggle = document.getElementById("theme-toggle");
-    const savedTheme = localStorage.getItem("theme") || "light";
+    function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(";").shift();
+    }
+
+    function setCookie(name, value, days = 365) {
+        const expires = new Date(Date.now() + days * 864e5).toUTCString();
+        document.cookie = `${name}=${value}; expires=${expires}; path=/`;
+    }
+
+    // Load saved theme or default to dark
+    let savedTheme = getCookie("theme") || "dark";
     document.documentElement.setAttribute("data-theme", savedTheme);
 
-    themeToggle.addEventListener("click", () => {
+    // Toggle theme on click (no changes to button visuals)
+    document.getElementById("theme-toggle").addEventListener("click", () => {
         const current = document.documentElement.getAttribute("data-theme");
         const next = current === "light" ? "dark" : "light";
         document.documentElement.setAttribute("data-theme", next);
-        localStorage.setItem("theme", next);
+        setCookie("theme", next);
     });
-});
-
-
-themeToggle.addEventListener('click', () => {
-    document.body.classList.toggle('dark');
-    if (document.body.classList.contains('dark')) {
-        themeToggle.textContent = 'Light Mode';
-    } else {
-        themeToggle.textContent = 'Dark Mode';
-    }
 });
 
 function addMessage(text, className, withCopyBtn = false) {
@@ -106,9 +108,11 @@ function sendMessage() {
     sendBtn.disabled = true;
     input.disabled = true;
 
-    const msgDiv = document.createElement('div');
-    msgDiv.className = 'message bot-msg';
-    chatBox.appendChild(msgDiv);
+    // Add typing indicator
+    const typingDiv = document.createElement('div');
+    typingDiv.className = 'message bot-msg typing-indicator';
+    typingDiv.innerHTML = 'Bot is typing<span class="typing-dots"></span>';
+    chatBox.appendChild(typingDiv);
     chatBox.scrollTop = chatBox.scrollHeight;
 
     fetch('/chat', {
@@ -119,6 +123,11 @@ function sendMessage() {
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
         let botText = '';
+        chatBox.removeChild(typingDiv);
+        const msgDiv = document.createElement('div');
+        msgDiv.className = 'message bot-msg';
+        chatBox.appendChild(msgDiv);
+        chatBox.scrollTop = chatBox.scrollHeight;
 
         function read() {
             reader.read().then(({ done, value }) => {
@@ -155,7 +164,6 @@ function sendMessage() {
         read();
     });
 }
-
 
 sendBtn.addEventListener('click', sendMessage);
 

@@ -51,6 +51,11 @@ def get_message(prompt: str, channel: Optional[Callable[[str], None]] = None) ->
     )
     text = ""
     passes = max(1, SETTINGS.NUM_PASSES)
+
+    def send(msg: str):
+        if channel:
+            channel(msg)
+
     try:
         for i in range(passes):
             temperature = SETTINGS.TEMPERATURES[i % len(SETTINGS.TEMPERATURES)]
@@ -60,7 +65,9 @@ def get_message(prompt: str, channel: Optional[Callable[[str], None]] = None) ->
             else:
                 rewrite_prompt = f"{SETTINGS.REWRITE_PROMPT}\nText:\n{text}"
                 system_message = SETTINGS.REWRITE_PROMPT
+
             is_last_pass = (i == passes - 1)
+
             if not is_last_pass:
                 resp = client.chat.completions.create(
                     model=SETTINGS.MODEL,
@@ -89,23 +96,18 @@ def get_message(prompt: str, channel: Optional[Callable[[str], None]] = None) ->
                 for chunk in response_stream:
                     token = getattr(chunk.choices[0].delta, "content", None)
                     if token:
-                        if channel:
-                            channel(token)
-                        else:
-                            print(token, end='', flush=True)
+                        send(token)
                         full_text += token
-                if not channel:
-                    print()
+
                 text = full_text.strip()
+                send(text)
+
     except OpenAIError as e:
         err_msg = f"[OpenAI API error] {str(e)}"
-        if channel:
-            channel(err_msg)
-        else:
-            print(err_msg)
+        send(err_msg)
         return err_msg
-    return text
 
+    return text
 
 def print_token(token: str):
     print(token, end='', flush=True)
