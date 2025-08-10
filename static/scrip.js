@@ -1,7 +1,6 @@
 const chatBox = document.getElementById('chat-box');
 const input = document.getElementById('msg-input');
 const sendBtn = document.getElementById('send-btn');
-// const themeToggle = document.getElementById('theme-toggle');
 
 let botTyping = false;
 
@@ -17,11 +16,9 @@ document.addEventListener("DOMContentLoaded", () => {
         document.cookie = `${name}=${value}; expires=${expires}; path=/`;
     }
 
-    // Load saved theme or default to dark
     let savedTheme = getCookie("theme") || "dark";
     document.documentElement.setAttribute("data-theme", savedTheme);
 
-    // Toggle theme on click (no changes to button visuals)
     document.getElementById("theme-toggle").addEventListener("click", () => {
         const current = document.documentElement.getAttribute("data-theme");
         const next = current === "light" ? "dark" : "light";
@@ -86,14 +83,12 @@ function botReply(sentence) {
                 });
             };
             msgDiv.appendChild(copyBtn);
-
             botTyping = false;
             sendBtn.disabled = false;
             input.disabled = false;
             input.focus();
         }
     }
-
     typeWord();
 }
 
@@ -103,18 +98,14 @@ function sendMessage() {
     if (!message) return;
     addMessage(message, 'user-msg');
     input.value = '';
-
     botTyping = true;
     sendBtn.disabled = true;
     input.disabled = true;
-
-    // Add typing indicator
     const typingDiv = document.createElement('div');
     typingDiv.className = 'message bot-msg typing-indicator';
     typingDiv.innerHTML = 'Bot is typing<span class="typing-dots"></span>';
     chatBox.appendChild(typingDiv);
     chatBox.scrollTop = chatBox.scrollHeight;
-
     fetch('/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -128,42 +119,52 @@ function sendMessage() {
         msgDiv.className = 'message bot-msg';
         chatBox.appendChild(msgDiv);
         chatBox.scrollTop = chatBox.scrollHeight;
-
+        let buffer = '';
         function read() {
             reader.read().then(({ done, value }) => {
                 if (done) {
-                    const copyBtn = document.createElement('button');
-                    copyBtn.textContent = 'Copy';
-                    copyBtn.className = 'copy-btn';
-                    copyBtn.title = 'Copy to clipboard';
-                    copyBtn.onclick = () => {
-                        navigator.clipboard.writeText(botText).then(() => {
-                            copyBtn.textContent = 'Copied!';
-                            setTimeout(() => (copyBtn.textContent = 'Copy'), 1500);
-                        });
-                    };
-                    msgDiv.appendChild(copyBtn);
-
-                    botTyping = false;
-                    sendBtn.disabled = false;
-                    input.disabled = false;
-                    input.focus();
+                    finishMessage();
                     return;
                 }
-                const chunk = decoder.decode(value, { stream: true });
-                const matches = chunk.match(/data: (.*)\n\n/);
-                if (matches) {
-                    const token = matches[1];
-                    botText += token;
-                    msgDiv.textContent = botText;
-                    chatBox.scrollTop = chatBox.scrollHeight;
+                buffer += decoder.decode(value, { stream: true });
+                let boundary;
+                while ((boundary = buffer.indexOf('\n\n')) !== -1) {
+                    const fullChunk = buffer.slice(0, boundary);
+                    buffer = buffer.slice(boundary + 2);
+
+                    if (fullChunk.startsWith('data: ')) {
+                        const token = fullChunk.slice(6);
+                        botText += token;
+                        msgDiv.textContent = botText;
+                        chatBox.scrollTop = chatBox.scrollHeight;
+                    }
                 }
                 read();
             });
         }
+
+        function finishMessage() {
+            const copyBtn = document.createElement('button');
+            copyBtn.textContent = 'Copy';
+            copyBtn.className = 'copy-btn';
+            copyBtn.title = 'Copy to clipboard';
+            copyBtn.onclick = () => {
+                navigator.clipboard.writeText(botText).then(() => {
+                    copyBtn.textContent = 'Copied!';
+                    setTimeout(() => (copyBtn.textContent = 'Copy'), 1500);
+                });
+            };
+            msgDiv.appendChild(copyBtn);
+
+            botTyping = false;
+            sendBtn.disabled = false;
+            input.disabled = false;
+            input.focus();
+        }
         read();
     });
 }
+
 
 sendBtn.addEventListener('click', sendMessage);
 

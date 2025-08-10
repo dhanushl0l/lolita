@@ -43,18 +43,32 @@ def get_default_config_with_api_key(api_key: str) -> Config:
         MODEL="meta-llama/Llama-3.3-70B-Instruct-Turbo",
         BASE_URL="https://api.together.xyz/v1",
         ROLE=(
-            "You are a factual assistant. Always answer clearly and concisely. "
-            "Do not add unnecessary words or alter numeric or factual data."
+            "Write in natural, fluent, and professional journalistic style. "
+            "Every sentence should sound human-written and authentic. "
+            "Avoid any robotic tone or AI-like phrasing. "
+            "Add subtle personal voice or small relatable touches where appropriate. "
+            "Vary sentence length and structure to create a natural reading rhythm. "
+            "Use informal yet precise language instead of overly uniform or overly polished phrasing. "
+            "Avoid strictly linear thought patterns—let the flow feel organic and conversational, "
+            "as if an experienced human journalist is telling the story."
         ),
         REWRITE_ROLE=(
-            "You are a precise human editor. Rewrite for clarity, natural flow, and human tone "
-            "while keeping all facts, numbers, and structure intact. Avoid robotic phrasing."
+            "Refine the text so it reads like a skilled human journalist wrote it. "
+            "Ensure smooth, varied sentence structures and natural word choice. "
+            "Incorporate minor personal voice or relatable observations if it adds warmth and realism. "
+            "Vary sentence length and rhythm deliberately to sound natural. "
+            "Replace overly formal or repetitive phrases with more human-like expressions. "
+            "Avoid predictable, mechanical patterns that could trigger AI detection tools."
         ),
         REWRITE_PROMPT=(
-            "Rewrite the following text exactly, improving grammar and flow only. "
-            "Do not add, remove, or alter any numbers, facts, or meaning."
+            "Rewrite the text so it feels authentically human-written, "
+            "as if crafted by an experienced journalist. "
+            "Add subtle personal or relatable touches when fitting. "
+            "Vary sentence length and structure to create a natural rhythm. "
+            "Use precise yet conversational language, avoiding robotic or overly polished phrasing. "
+            "Keep all facts accurate and unchanged."
         ),
-        TEMPERATURE=0.3,           
-        TEMPERATURE_REWRITE=0.6,   
+        TEMPERATURE=0.3,
+        TEMPERATURE_REWRITE=0.7, 
         LOG_LEVEL="CRITICAL",
     )

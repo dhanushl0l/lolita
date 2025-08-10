@@ -2,7 +2,7 @@ import argparse
 import os
 import sys
 import logging
-from openai import OpenAI, OpenAIError
+from openai import OpenAI
 from config import load_config_from_json, login_tty
 from typing import Callable, Optional
 
@@ -42,7 +42,6 @@ def main():
     if args.message:
         channel = print_token
         get_message(args.message, channel)
-        print("\n")
 
 def get_message(prompt: str, channel: Optional[Callable[[str], None]] = None) -> None:
     client = OpenAI(api_key=SETTINGS.API_KEY, base_url=SETTINGS.BASE_URL)
@@ -64,7 +63,6 @@ def get_message(prompt: str, channel: Optional[Callable[[str], None]] = None) ->
             presence_penalty=0.0,
         )
         text = (resp.choices[0].message.content or "").strip()
-
         rewrite_prompt = f"{SETTINGS.REWRITE_PROMPT}\nText:\n{text}"
         response_stream = client.chat.completions.create(
             model=SETTINGS.MODEL,
@@ -78,12 +76,15 @@ def get_message(prompt: str, channel: Optional[Callable[[str], None]] = None) ->
             presence_penalty=0.0,
             stream=True,
         )
-
+        full_message_parts = []
         for chunk in response_stream:
             token = getattr(chunk.choices[0].delta, "content", None)
             if token:
-                send(token)
+                send(token)              
+                full_message_parts.append(token)
 
+        final_text = "".join(full_message_parts) 
+        print(final_text)
     except Exception as e:
         send(f"[Error] {str(e)}")
 
