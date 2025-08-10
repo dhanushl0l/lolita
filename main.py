@@ -6,15 +6,15 @@ from openai import OpenAI
 from config import load_config_from_json, login_tty
 from typing import Callable, Optional
 
-APP_VERSION = "0.0.3"
+NAME = "Lolita"
+APP_VERSION = "0.0.4"
 SETTINGS = load_config_from_json("config.json")
 
 def main():
     log_level = os.getenv("LOG", SETTINGS.LOG_LEVEL).upper()
     logging.basicConfig(level=log_level)
 
-    parser = argparse.ArgumentParser(description="Lolita CLI")
-
+    parser = argparse.ArgumentParser(description=f"{NAME} CLI")
     parser.add_argument(
         "-v",
         "--version",

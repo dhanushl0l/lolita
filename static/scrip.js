@@ -5,27 +5,27 @@ const sendBtn = document.getElementById('send-btn');
 let botTyping = false;
 
 document.addEventListener("DOMContentLoaded", () => {
-    function getCookie(name) {
-        const value = `; ${document.cookie}`;
-        const parts = value.split(`; ${name}=`);
-        if (parts.length === 2) return parts.pop().split(";").shift();
-    }
+    const getCookie = name =>
+        document.cookie.split("; ").find(row => row.startsWith(name + "="))?.split("=")[1];
 
-    function setCookie(name, value, days = 365) {
-        const expires = new Date(Date.now() + days * 864e5).toUTCString();
+    const setCookie = (name, value, days = 365) => {
+        const expires = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toUTCString();
         document.cookie = `${name}=${value}; expires=${expires}; path=/`;
+    };
+
+    document.documentElement.setAttribute("data-theme", getCookie("theme") || "dark");
+
+    const themeToggle = document.getElementById("theme-toggle");
+    if (themeToggle) {
+        themeToggle.addEventListener("click", () => {
+            const current = document.documentElement.getAttribute("data-theme");
+            const next = current === "light" ? "dark" : "light";
+            document.documentElement.setAttribute("data-theme", next);
+            setCookie("theme", next);
+        });
     }
-
-    let savedTheme = getCookie("theme") || "dark";
-    document.documentElement.setAttribute("data-theme", savedTheme);
-
-    document.getElementById("theme-toggle").addEventListener("click", () => {
-        const current = document.documentElement.getAttribute("data-theme");
-        const next = current === "light" ? "dark" : "light";
-        document.documentElement.setAttribute("data-theme", next);
-        setCookie("theme", next);
-    });
 });
+
 
 function addMessage(text, className, withCopyBtn = false) {
     const msgDiv = document.createElement('div');
@@ -92,20 +92,31 @@ function botReply(sentence) {
     typeWord();
 }
 
+let firstMessageSent = false;
+
 function sendMessage() {
     if (botTyping) return;
     const message = input.value.trim();
     if (!message) return;
+    if (!firstMessageSent) {
+        chatBox.classList.remove("chat-box-empty");
+        document.querySelector('.chat-title').style.display = 'inline';
+        document.querySelector('.chat-box-title').style.display = 'none';
+        firstMessageSent = true;
+    }
+
     addMessage(message, 'user-msg');
     input.value = '';
     botTyping = true;
     sendBtn.disabled = true;
     input.disabled = true;
+
     const typingDiv = document.createElement('div');
     typingDiv.className = 'message bot-msg typing-indicator';
-    typingDiv.innerHTML = 'Bot is typing<span class="typing-dots"></span>';
+    typingDiv.innerHTML = `${NAME} is typing<span class="typing-dots"></span>`;
     chatBox.appendChild(typingDiv);
     chatBox.scrollTop = chatBox.scrollHeight;
+
     fetch('/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -115,10 +126,12 @@ function sendMessage() {
         const decoder = new TextDecoder();
         let botText = '';
         chatBox.removeChild(typingDiv);
+
         const msgDiv = document.createElement('div');
         msgDiv.className = 'message bot-msg';
         chatBox.appendChild(msgDiv);
         chatBox.scrollTop = chatBox.scrollHeight;
+
         let buffer = '';
         function read() {
             reader.read().then(({ done, value }) => {

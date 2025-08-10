@@ -1,24 +1,27 @@
+import os
 from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse, StreamingResponse
+from fastapi.responses import FileResponse, HTMLResponse, StreamingResponse
 import asyncio
 from typing import AsyncGenerator
 from config import load_config_from_json
-from main import get_message
+from main import get_message, NAME
 from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 
 
 app = FastAPI()
 
-app = FastAPI()
 SETTINGS = load_config_from_json("config.json")
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
+templates = Jinja2Templates(directory="static")
 
 @app.get("/", response_class=HTMLResponse)
-def start_web():
-    with open("static/index.html", "r") as f:
-        html_content = f.read()
-    return html_content
+def start_web(request: Request):
+    return templates.TemplateResponse("index.html", {
+        "request": request,
+        "NAME": NAME
+    })
 
 @app.post("/chat")
 async def chat_stream(request: Request):
@@ -40,3 +43,8 @@ async def chat_stream(request: Request):
                 continue
         await asyncio.wrap_future(task)
     return StreamingResponse(event_generator(), media_type="text/event-stream")
+
+@app.get("/favicon.ico")
+async def favicon():
+    file_path = os.path.join("static", "assets/theam.svg") 
+    return FileResponse(file_path)
