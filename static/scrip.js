@@ -1,6 +1,7 @@
 const chatBox = document.getElementById('chat-box');
 const input = document.getElementById('msg-input');
 const sendBtn = document.getElementById('send-btn');
+const headerBar = document.getElementById('chat-header');
 
 let botTyping = false;
 
@@ -100,6 +101,7 @@ function sendMessage() {
     if (!message) return;
     if (!firstMessageSent) {
         chatBox.classList.remove("chat-box-empty");
+        headerBar.classList.remove("chat-header-stock");
         document.querySelector('.chat-title').style.display = 'inline';
         document.querySelector('.chat-box-title').style.display = 'none';
         firstMessageSent = true;

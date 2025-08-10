@@ -90,6 +90,14 @@ body {
     height: 30px;
 }
 
+.chat-header-stock {
+    background: none !important;
+    color: none !important;
+    border-bottom: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
 .chat-title {
     font-family: 'Futura',
         sans-serif;
@@ -194,6 +202,10 @@ body {
     margin-top: 20px;
 }
 
+#send-btn:hover {
+    background: var(--border-color);
+}
+
 #send-btn img {
     width: 60%;
     height: 60%;
@@ -228,8 +240,7 @@ body {
 }
 
 #theme-toggle:hover {
-    background: none;
-    color: var(--text-color);
+    filter: invert(0.5);
 }
 
 .typing-indicator {
