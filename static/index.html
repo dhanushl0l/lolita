@@ -10,21 +10,20 @@
         let NAME = "{{ NAME }}"
     </script>
     <script src="/static/scrip.js" defer></script>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600&family=Fredoka:wght@600&family=Pacifico&family=Lora:wght@700&family=Libre+Baskerville:wght@700&family=Prata&family=Inter:wght@700&family=Sofia+Sans:wght@700&family=Mulish:wght@700&family=Playfair+Display:wght@700&family=Bebas+Neue&family=Oswald:wght@600&family=Raleway:wght@700&family=Great+Vibes&family=Parisienne&family=Allura&family=Bodoni+Moda:wght@700&family=Montserrat:wght@700&display=swap"
-        rel="stylesheet">
 </head>
 
 <body>
     <div id="chat-header" class="chat-header-stock">
-        <span class="chat-title">{{ NAME }} Chat</span>
+        <span class="chat-title">{{ NAME }}</span>
         <button id="theme-toggle" type="button">
             <img id="theme-icon" src="/static/assets/theam.svg" alt="Toggle Theme" width="24" height="24">
         </button>
     </div>
     <div id="chat-container">
         <div id="chat-box" class="chat-box-empty">
-            <span class="chat-box-title">{{ NAME }} Chat</span>
+            <span class="chat-box-title">
+                <span class="chat-box-title-highlate">{{ NAME }}</span> Chat
+            </span>
         </div>
         <div id="input-area">
             <textarea id="msg-input" placeholder="Type a message..."></textarea>

@@ -4,8 +4,8 @@
     --user-msg-bg: rgba(0, 0, 0, 0.85);
     --bot-msg-bg: rgba(0, 0, 0, 0.08);
     --text-color: #1d1d1f;
-    --border-color: rgba(0, 0, 0, 0.15);
-    --glow-color: rgba(0, 0, 0, 0.4);
+    --border-color: rgba(0, 0, 0, 1);
+    --glow-color: #9a0cf1;
     --text-invert-color: #ffffff;
 }
 
@@ -14,19 +14,18 @@
     --chat-bg: #131719;
     --user-msg-bg: #14181a;
     --bot-msg-bg: #212324;
-    --text-color: #a3a3a3;
+    --text-color: #ffffff;
     --border-color: rgba(255, 255, 255, 0.1);
-    --glow-color: #8147fc;
+    --glow-color: #bb4cff;
     --text-invert-color: #ffffff;
 }
 
 #theme-icon {
-    filter: invert(1);
     transition: filter 0.3s ease;
 }
 
-[data-theme="light"] #theme-icon {
-    filter: invert(0);
+[data-theme="dark"] #theme-icon {
+    filter: invert(0.6);
 }
 
 #chat-container {
@@ -65,8 +64,13 @@ body {
 }
 
 .chat-box-title {
-    font-size: clamp(1rem, 10vw, 100px);
+    font-size: min(20vw, 200px);
     text-align: center;
+    font-family: "Stella Demo", sans-serif;
+}
+
+.chat-box-title-highlate {
+    color: var(--glow-color);
 }
 
 #chat-header {
@@ -88,6 +92,8 @@ body {
     z-index: 9;
     align-items: center;
     height: 30px;
+    font-size: 2rem;
+    letter-spacing: 3px;
 }
 
 .chat-header-stock {
@@ -98,9 +104,15 @@ body {
     -webkit-backdrop-filter: none !important;
 }
 
+@font-face {
+    font-family: "Stella Demo";
+    src: url("/static/assets/font/Stella_Demo.ttf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
+}
+
 .chat-title {
-    font-family: 'Futura',
-        sans-serif;
+    font-family: "Stella Demo", sans-serif;
     margin-left: 20px;
 }
 
@@ -119,7 +131,7 @@ body {
     border-top: 1px solid var(--border-color);
     background: var(--chat-bg);
     margin-bottom: 26px;
-    border: 1px solid var(--border-color);
+    border: 2px solid var(--border-color);
 }
 
 #chat-box::-webkit-scrollbar-thumb {
@@ -214,7 +226,7 @@ body {
 }
 
 [data-theme="dark"] #send-btn img {
-    filter: invert(1);
+    filter: invert(0.6);
 }
 
 #send-btn:disabled {
