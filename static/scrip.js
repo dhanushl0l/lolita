@@ -3,6 +3,10 @@ const input = document.getElementById('msg-input');
 const sendBtn = document.getElementById('send-btn');
 const headerBar = document.getElementById('chat-header');
 
+let socket;
+let firstMessageSent = false;
+let botText = '';
+let currentBotMsg = null;
 let botTyping = false;
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -52,48 +56,23 @@ function addMessage(text, className, withCopyBtn = false) {
     return msgDiv;
 }
 
-function botReply(sentence) {
-    botTyping = true;
-    sendBtn.disabled = true;
-    input.disabled = true;
+function setupSocket() {
+    let protocol = (location.protocol === "https:") ? "wss://" : "ws://";
+    socket = new WebSocket(`${protocol}${location.host}/ws/chat`);
 
-    const words = sentence.split(' ');
-    let index = 0;
-    let currentText = '';
-    const msgDiv = document.createElement('div');
-    msgDiv.className = 'message bot-msg';
-    chatBox.appendChild(msgDiv);
-    chatBox.scrollTop = chatBox.scrollHeight;
-
-    function typeWord() {
-        if (index < words.length) {
-            currentText += (index === 0 ? '' : ' ') + words[index];
-            msgDiv.textContent = currentText;
-            chatBox.scrollTop = chatBox.scrollHeight;
-            index++;
-            setTimeout(typeWord, 400);
-        } else {
-            const copyBtn = document.createElement('button');
-            copyBtn.textContent = 'Copy';
-            copyBtn.className = 'copy-btn';
-            copyBtn.title = 'Copy to clipboard';
-            copyBtn.onclick = () => {
-                navigator.clipboard.writeText(currentText).then(() => {
-                    copyBtn.textContent = 'Copied!';
-                    setTimeout(() => (copyBtn.textContent = 'Copy'), 1500);
-                });
-            };
-            msgDiv.appendChild(copyBtn);
-            botTyping = false;
-            sendBtn.disabled = false;
-            input.disabled = false;
-            input.focus();
+    socket.addEventListener("message", (event) => {
+        if (event.data === "[[END]]") {
+            finishMessage(currentBotMsg);
+            return;
         }
-    }
-    typeWord();
-}
+        botText += event.data;
+        currentBotMsg.querySelector('.bot-text').textContent = botText;
+        chatBox.scrollTop = chatBox.scrollHeight;
+    });
 
-let firstMessageSent = false;
+    socket.addEventListener("close", () => console.log("WebSocket closed"));
+    socket.addEventListener("error", (err) => console.error("WebSocket error", err));
+}
 
 function sendMessage() {
     if (botTyping) return;
@@ -113,71 +92,39 @@ function sendMessage() {
     sendBtn.disabled = true;
     input.disabled = true;
 
-    const typingDiv = document.createElement('div');
-    typingDiv.className = 'message bot-msg typing-indicator';
-    typingDiv.innerHTML = `${NAME} is typing<span class="typing-dots"></span>`;
-    chatBox.appendChild(typingDiv);
+    currentBotMsg = document.createElement('div');
+    currentBotMsg.className = 'message bot-msg';
+    currentBotMsg.innerHTML = `<span class="bot-text">${NAME} is typing...</span>`;
+    chatBox.appendChild(currentBotMsg);
     chatBox.scrollTop = chatBox.scrollHeight;
 
-    fetch('/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message }),
-    }).then(response => {
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder();
-        let botText = '';
-        chatBox.removeChild(typingDiv);
+    botText = '';
 
-        const msgDiv = document.createElement('div');
-        msgDiv.className = 'message bot-msg';
-        chatBox.appendChild(msgDiv);
-        chatBox.scrollTop = chatBox.scrollHeight;
+    if (!socket || socket.readyState !== WebSocket.OPEN) {
+        setupSocket();
+        socket.addEventListener("open", () => socket.send(message), { once: true });
+    } else {
+        socket.send(message);
+    }
+}
 
-        let buffer = '';
-        function read() {
-            reader.read().then(({ done, value }) => {
-                if (done) {
-                    finishMessage();
-                    return;
-                }
-                buffer += decoder.decode(value, { stream: true });
-                let boundary;
-                while ((boundary = buffer.indexOf('\n\n')) !== -1) {
-                    const fullChunk = buffer.slice(0, boundary);
-                    buffer = buffer.slice(boundary + 2);
+function finishMessage(botMsg) {
+    const copyBtn = document.createElement('button');
+    copyBtn.textContent = 'Copy';
+    copyBtn.className = 'copy-btn';
+    copyBtn.title = 'Copy to clipboard';
+    copyBtn.onclick = () => {
+        navigator.clipboard.writeText(botText).then(() => {
+            copyBtn.textContent = 'Copied!';
+            setTimeout(() => (copyBtn.textContent = 'Copy'), 1500);
+        });
+    };
+    botMsg.appendChild(copyBtn);
 
-                    if (fullChunk.startsWith('data: ')) {
-                        const token = fullChunk.slice(6);
-                        botText += token;
-                        msgDiv.textContent = botText;
-                        chatBox.scrollTop = chatBox.scrollHeight;
-                    }
-                }
-                read();
-            });
-        }
-
-        function finishMessage() {
-            const copyBtn = document.createElement('button');
-            copyBtn.textContent = 'Copy';
-            copyBtn.className = 'copy-btn';
-            copyBtn.title = 'Copy to clipboard';
-            copyBtn.onclick = () => {
-                navigator.clipboard.writeText(botText).then(() => {
-                    copyBtn.textContent = 'Copied!';
-                    setTimeout(() => (copyBtn.textContent = 'Copy'), 1500);
-                });
-            };
-            msgDiv.appendChild(copyBtn);
-
-            botTyping = false;
-            sendBtn.disabled = false;
-            input.disabled = false;
-            input.focus();
-        }
-        read();
-    });
+    botTyping = false;
+    sendBtn.disabled = false;
+    input.disabled = false;
+    input.focus();
 }
 
 
@@ -187,5 +134,18 @@ input.addEventListener('keydown', e => {
     if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
         sendMessage();
+    }
+});
+
+document.addEventListener('keydown', (e) => {
+    if (e.ctrlKey || e.altKey || e.metaKey) return;
+    if (e.key.length === 1) {
+        e.preventDefault();
+        input.focus();
+        const start = input.selectionStart || input.value.length;
+        const end = input.selectionEnd || input.value.length;
+        input.value =
+            input.value.substring(0, start) + e.key + input.value.substring(end);
+        input.setSelectionRange(start + 1, start + 1);
     }
 });

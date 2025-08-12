@@ -2,3 +2,4 @@ openai
 fastapi
 uvicorn
 jinja2
+uvicorn[standard]

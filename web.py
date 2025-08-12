@@ -1,5 +1,5 @@
 import os
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, WebSocket
 from fastapi.responses import FileResponse, HTMLResponse, StreamingResponse
 import asyncio
 from typing import AsyncGenerator
@@ -23,28 +23,25 @@ def start_web(request: Request):
         "NAME": NAME
     })
 
-@app.post("/chat")
-async def chat_stream(request: Request):
-    data = await request.json()
-    prompt = data.get("message", "")
-    queue = asyncio.Queue()
-    loop = asyncio.get_event_loop()
-    def channel(token: str):
-        asyncio.run_coroutine_threadsafe(queue.put(token), loop)
-    task = loop.run_in_executor(None, get_message, prompt, channel)
-    async def event_generator() -> AsyncGenerator[str, None]:
+@app.websocket("/ws/chat")
+async def websocket_chat(websocket: WebSocket):
+    await websocket.accept()
+    try:
         while True:
-            if task.done() and queue.empty():
-                break
-            try:
-                token = await asyncio.wait_for(queue.get(), timeout=0.1)
-                yield f"data: {token}\n\n"
-            except asyncio.TimeoutError:
-                continue
-        await asyncio.wrap_future(task)
-    return StreamingResponse(event_generator(), media_type="text/event-stream")
+            data: str = await websocket.receive_text()
+            def send(val: str) -> None:
+                loop = asyncio.get_event_loop()
+                loop.call_soon_threadsafe(
+                    asyncio.create_task,
+                    websocket.send_text(val)
+                )
+            get_message(data, send)
+            await websocket.send_text("[[END]]")
+    except Exception as e:
+        print("WebSocket closed:", e)
+
 
 @app.get("/favicon.ico")
 async def favicon():
-    file_path = os.path.join("static", "assets/theam.svg") 
+    file_path = os.path.join("static", "assets", "theam.svg") 
     return FileResponse(file_path)
