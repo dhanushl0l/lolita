@@ -5,7 +5,6 @@ const headerBar = document.getElementById('chat-header');
 
 let socket;
 let firstMessageSent = false;
-let botText = '';
 let currentBotMsg = null;
 let botTyping = false;
 
@@ -74,6 +73,7 @@ function setupSocket() {
     socket.addEventListener("error", (err) => console.error("WebSocket error", err));
 }
 
+
 function sendMessage() {
     if (botTyping) return;
     const message = input.value.trim();
@@ -94,7 +94,7 @@ function sendMessage() {
 
     currentBotMsg = document.createElement('div');
     currentBotMsg.className = 'message bot-msg';
-    currentBotMsg.innerHTML = `<span class="bot-text">${NAME} is typing...</span>`;
+    currentBotMsg.innerHTML = `<span class="bot-text typing">${NAME} is typing<span class="dots"></span></span>`;
     chatBox.appendChild(currentBotMsg);
     chatBox.scrollTop = chatBox.scrollHeight;
 
@@ -126,7 +126,6 @@ function finishMessage(botMsg) {
     input.disabled = false;
     input.focus();
 }
-
 
 sendBtn.addEventListener('click', sendMessage);
 

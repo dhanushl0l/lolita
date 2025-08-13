@@ -32,7 +32,6 @@
     width: 80vw;
     height: 100vh;
     max-width: 800px;
-    min-width: 320px;
     display: flex;
     flex-direction: column;
     position: relative;
@@ -47,7 +46,6 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
     margin: 0;
     transition: background 0.3s, color 0.3s;
 }
@@ -196,6 +194,7 @@ body {
     height: 50px;
     background: var(--chat-bg);
     color: var(--text-color);
+    width: 0;
 }
 
 #send-btn {
@@ -255,64 +254,94 @@ body {
     filter: invert(0.5);
 }
 
-.typing-indicator {
-    display: inline-block;
-    background: var(--bot-msg-bg);
-    color: var(--text-color);
-    padding: 6px 10px;
-    border-radius: 12px;
-    font-size: 14px;
-    font-style: italic;
+#send-btn:hover img {
+    filter: invert(1);
 }
 
-.typing-dots {
-    display: inline-block;
-    animation: blink 1.5s infinite steps(1);
-}
-
-@keyframes blink {
-    0% {
-        content: '';
-    }
-
-    33% {
-        content: '.';
-    }
-
-    66% {
-        content: '..';
-    }
-
-    100% {
-        content: '...';
-    }
-}
-
-.typing-dots::after {
+.typing .dots::after {
     content: '';
-    animation: dots 1s steps(3, end) infinite;
+    animation: typingDots 1.5s infinite;
 }
 
-@keyframes dots {
+@keyframes typingDots {
     0% {
         content: '';
     }
 
-    33% {
+    25% {
         content: '.';
     }
 
-    66% {
+    50% {
         content: '..';
     }
 
-    100% {
+    75% {
         content: '...';
+    }
+
+    100% {
+        content: '';
     }
 }
 
-@media screen and (max-width: 768px) {
+#theme-icon {
+    width: 25px;
+    height: 25px;
+}
+
+
+@media only screen and (max-width:1000px) {
+
+    html,
+    body {
+        height: 100%;
+        width: 100%;
+        overflow-x: hidden;
+        -webkit-text-size-adjust: 100%;
+        transition: background 0.3s, color 0.3s;
+        touch-action: manipulation;
+        margin: 0;
+        padding: 0;
+    }
+
     #chat-container {
-        width: 95vw;
+        width: 100vw;
+        max-width: none;
+    }
+
+    #input-area {
+        font-size: 14px;
+        border-radius: 10px 10px 0 0;
+        margin-bottom: 0;
+        height: 120px;
+    }
+
+    #send-btn {
+        width: 70px;
+        height: 70px;
+    }
+
+    #msg-input {
+        height: 80px;
+        font-size: 22px;
+    }
+
+    #chat-header {
+        height: 55px;
+        width: 100vw;
+    }
+
+    #theme-icon {
+        height: 40px;
+        width: 40px;
+    }
+
+    .user-msg {
+        margin-top: 69px;
+    }
+
+    #chat-header {
+        font-size: 49px;
     }
 }

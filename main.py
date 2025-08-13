@@ -2,9 +2,10 @@ import argparse
 import os
 import sys
 import logging
-from openai import OpenAI
-from config import load_config_from_json, login_tty
 from typing import Callable, Optional
+from openai import OpenAI
+
+from config import load_config_from_json, login_tty
 
 NAME = "Lolita"
 APP_VERSION = "0.0.4"
@@ -82,12 +83,10 @@ def get_message(prompt: str, channel: Optional[Callable[[str], None]] = None) ->
             if token:
                 send(token)              
                 full_message_parts.append(token)
-
         final_text = "".join(full_message_parts) 
         print(final_text)
     except Exception as e:
         send(f"[Error] {str(e)}")
-
 
 def print_token(token: str):
     print(token, end='', flush=True)
